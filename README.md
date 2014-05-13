@@ -740,7 +740,7 @@ $ curl https://api.astra.io/v0/bucket/testBucket/object/hawaii.jpg \
 #### `object` Update
 
 * Method: `POST`
-* Path: `/bucket/{bkt_name}/object`
+* Path: `/bucket/{bkt_name}/object/{obj_name}`
 * Form fields:
     * [`name`] - new object name (optional)
     * [`type`] - new object type (optional)
@@ -1044,4 +1044,5 @@ Changelog
 
 #### v0.1
 
+* 2014-05-13 - Fix missing name in object update path
 * 2014-05-12 - Initial API release
