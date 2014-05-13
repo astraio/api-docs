@@ -952,7 +952,7 @@ $ curl 'http://api.astra.io//v0/public/code/js/client.js?expires=2014-06-01T12%3
     -X GET
 ```
 
-=> *object streams via CDN with `Content-Type: application/javascript` header*
+=> *object streams directly with `Content-Type: application/javascript` header*
 
 #### `public` Update
 
@@ -1044,5 +1044,6 @@ Changelog
 
 #### v0.1
 
+* 2014-05-13 - Correct direct streaming example
 * 2014-05-13 - Fix missing name in object update path
 * 2014-05-12 - Initial API release
