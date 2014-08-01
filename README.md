@@ -212,14 +212,14 @@ Buckets are containers for objects. They exist only one level deep (i.e., they c
 
 #### Long Form
 
-| Field     | Type      | Description                                       |
-|:----------|:----------|:--------------------------------------------------|
-| `name`    | string    | 256 characters or fewer from `[A-Za-z0-9.\-_]`    |
-| `size`    | integer   | total of all objects (in bytes)                   |
-| `status`  | string    | `ready` (reserved for future use)                 |
-| `objects` | array     | list of short-form objects                        |
-| `ctime`   | timestamp | creation time                                     |
-| `mtime`   | timestamp | modification time (does not inherit from objects) |
+| Field     | Type      | Description                                                       |
+|:----------|:----------|:------------------------------------------------------------------|
+| `name`    | string    | 1-256 chars from `[A-Za-z0-9.\-_]` (cannot begin/end with `.`)    |
+| `size`    | integer   | total of all objects (in bytes)                                   |
+| `status`  | string    | `ready` (reserved for future use)                                 |
+| `objects` | array     | list of short-form objects                                        |
+| `ctime`   | timestamp | creation time                                                     |
+| `mtime`   | timestamp | modification time (does not inherit from objects)                 |
 
 ```json
 {
@@ -259,17 +259,17 @@ You can identify objects in your account uniquely using bucket-object name tuple
 
 #### Long Form
 
-| Field    | Type      | Description                                                           |
-|:---------|:----------|:----------------------------------------------------------------------|
-| `name`   | string    | 2048 characters or fewer from `[A-Za-z0-9.\-_]`                       |
-| `bucket` | string    | name of parent bucket                                                 |
-| `hash`   | string    | [SHA-1](https://en.wikipedia.org/wiki/SHA-1) hash (40 hex characters) |
-| `size`   | integer   | size (in bytes)                                                       |
-| `type`   | string    | currently `blob` or `image`                                           |
-|  *...*   | *...*     | *type-specific fields*                                                |
-| `status` | string    | `ready` (reserved for future use)                                     |
-| `ctime`  | timestamp | creation time                                                         |
-| `mtime`  | timestamp | modification time                                                     |
+| Field    | Type      | Description                                                      |
+|:---------|:----------|:-----------------------------------------------------------------|
+| `name`   | string    | 1-2048 chars from `[A-Za-z0-9.\-_]` (cannot begin/end with `.`)  |
+| `bucket` | string    | name of parent bucket                                            |
+| `hash`   | string    | [SHA-1](https://en.wikipedia.org/wiki/SHA-1) hash (40 hex chars) |
+| `size`   | integer   | size (in bytes)                                                  |
+| `type`   | string    | currently `blob` or `image`                                      |
+|  *...*   | *...*     | *type-specific fields*                                           |
+| `status` | string    | `ready` (reserved for future use)                                |
+| `ctime`  | timestamp | creation time                                                    |
+| `mtime`  | timestamp | modification time                                                |
 
 ##### `blob` Objects
 
@@ -1045,6 +1045,7 @@ Changelog
 
 #### v0.1
 
+* 2014-08-01 - Clarify period in bucket/object names
 * 2014-08-01 - Add TOC link to public endpoint
 * 2014-05-13 - Correct direct streaming example
 * 2014-05-13 - Fix missing name in object update path
