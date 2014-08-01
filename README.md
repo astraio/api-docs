@@ -166,7 +166,7 @@ To serve public requests via CDN, you can substitute `cdn` for `api` in the subd
 http://cdn.astra.io/v0/public/...
 ```
 
-Note that the API supports delivery via CDN for public requests only.
+The API supports delivery via CDN for public streaming requests only; metadata must be accessed directly.
 
 ### HMAC Signatures
 
@@ -1045,6 +1045,7 @@ Changelog
 
 #### v0.1
 
+* 2014-08-01 - Note CDN for public streams only
 * 2014-08-01 - Clarify period in bucket/object names
 * 2014-08-01 - Add TOC link to public endpoint
 * 2014-05-13 - Correct direct streaming example
