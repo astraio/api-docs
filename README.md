@@ -40,6 +40,7 @@ We're actively expanding the API and have plans for query ranges and paging, acc
     * [`bucket`](#bucket)
     * [`object`](#object)
     * [`stream`](#stream)
+    * [`public`](#public)
 * [Errors](#errors)
     * [`AuthErr`](#autherr)
     * [`FormErr`](#formerr)
@@ -1044,6 +1045,7 @@ Changelog
 
 #### v0.1
 
+* 2014-08-01 - Add TOC link to public endpoint
 * 2014-05-13 - Correct direct streaming example
 * 2014-05-13 - Fix missing name in object update path
 * 2014-05-12 - Initial API release
