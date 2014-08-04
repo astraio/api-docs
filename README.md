@@ -8,17 +8,19 @@ Astra API Docs (v0.1)
 * content delivery via direct link or built-in CDN; and
 * flat rates for disk space and bandwidth (no tiers or additional API fees).
 
-The infrastructure behind Astra has powered [PhotoShelter](http://www.photoshelter.com/) for the last decade. Our distributed, redundant storage system currently handles billions of objects, comprising several PBs of data.
+The infrastructure behind Astra has powered [PhotoShelter](http://www.photoshelter.com/) for the last decade. Our distributed, redundant storage system currently handles billions of objects, comprising several petabytes of data.
 
 #### Contact
 
-To sign up, request a trial, or submit feature requests, e-mail [hello@astra.io](mailto:hello@astra.io).
-
-For more info, including rates, check out [astra.io](https://astra.io/).
+* For more info, including rates, check out: https://astra.io/
+* To sign up for a **60-day free trial**, visit: https://astra.io/trial/
+* For support, feature requests, or bugs, e-mail: [hello@astra.io](mailto:hello@astra.io)
 
 #### Future Work
 
-We're actively expanding the API and have plans for query ranges and paging, accounting endpoints, rulesets, etc. If there's an object type, transform, or other feature you need, please don't hesitate to contact us.
+While tested and stable, this version of Astra is a **preview release** which we'll be actively expanding.
+
+We have plans for implementing usage endpoints, cache rulesets, auth tokens, query ranges/paging, and more. If there's an object type, transform, or other feature you need, please don't hesitate to [contact us](mailto:hello@astra.io).
 
 #### Contents
 
@@ -104,6 +106,8 @@ $ curl https://api.astra.io/v0/... \
 
 Future versions of the API may allow you to authenticate requests using tokens.
 
+You can maintain your account's shared secrets by logging into the [control panel](https://astra.io/panel/). In addition to adding and fully deleting secrets, you can also toggle their active statuses in order to disable them temporarily.
+
 ### Responses
 
 Except when streaming binary data, the Astra API returns JSON exclusively. All JSON responses, regardless of the resource being accessed, contain an `ok` boolean to say whether the request succeeded.
@@ -176,7 +180,7 @@ HMAC-SHA1 signatures are used to verify the sources and integrity of public requ
 The API's method for constructing and signing messages is (in PHP-style pseudocode):
 
 ```php
-function sign_request($http_method, $path, $percent_encoded_query_str, $secret)
+function sign_request($http_method, $path, $percent_encoded_query_str=null, $secret)
 {
     if (isset($percent_encoded_query_str)) {
         $sorted_qs = sort_by_field_name($percent_encoded_query_str); // lexicographical order
@@ -938,7 +942,7 @@ $path = '/v0/public/code/js/client.js';
 $sorted_qs = 'expires=2014-06-01T12%3A00%3A00Z'; // percent-encoded '2014-06-01T12:00:00Z'
 $secret = '3jaX4Bls9rxCiqSYfv5FaRMbfqff2Vh7';
 
-$str = $http_method . ':' . $path . (isset($sorted_qs) ? ('?' . $sorted_qs) : '');
+$str = $http_method . ':' . $path . (empty($sorted_qs) ? '' : ('?' . $sorted_qs));
 // => 'GET:/v0/public/code/js/client.js?expires=2014-06-01T12%3A00%3A00Z'
 
 $sha1 = hash_hmac('sha1', $str, $secret, true);
@@ -1053,6 +1057,7 @@ Changelog
 
 #### v0.1
 
+* 2014-08-04 - Update header and link to control panel
 * 2014-08-04 - Clarify HMAC code and add ProtocolErr type
 * 2014-08-01 - Note CDN for public streams only
 * 2014-08-01 - Clarify period in bucket/object names
