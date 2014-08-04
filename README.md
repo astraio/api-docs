@@ -1,7 +1,7 @@
 Astra API Docs (v0.1)
 =====================
 
-[Astra](https://astra.io/) is a cloud platform for storing, transforming, and delivering media. The system includes:
+[Astra](https://astra.io/) is a modern cloud platform for storing, transforming, and delivering media. The system includes:
 
 * key-value storage for static files, with type info (image, generic blob, etc.);
 * type-specific transforms (e.g., image resizing), which can be applied on the fly;
@@ -42,6 +42,7 @@ We're actively expanding the API and have plans for query ranges and paging, acc
     * [`stream`](#stream)
     * [`public`](#public)
 * [Errors](#errors)
+    * [`ProtocolErr`](#protocolerr)
     * [`AuthErr`](#autherr)
     * [`FormErr`](#formerr)
     * [`AccountErr`](#accounterr)
@@ -181,7 +182,7 @@ function sign_request($http_method, $path, $percent_encoded_query_str, $secret)
         $sorted_qs = sort_by_field_name($percent_encoded_query_str); // lexicographical order
     }
 
-    $str = $http_method . ':' . $path . (isset($sorted_qs) ? ('?' . $sorted_qs) : '');
+    $str = $http_method . ':' . $path . (empty($sorted_qs) ? '' : ('?' . $sorted_qs));
     $sha1 = hash_hmac('sha1', $str, $secret, true); // as raw binary data
 
     return rtrim(strtr(base64_encode($sha1), '+/', '-_'), '='); // unpadded base64url-style sig
@@ -912,7 +913,7 @@ $path = '/v0/public/pics/assets/otis-04.jpg';
 $sorted_qs = 'height=400&width=600';
 $secret = '3jaX4Bls9rxCiqSYfv5FaRMbfqff2Vh7';
 
-$str = $http_method . ':' . $path . (isset($sorted_qs) ? ('?' . $sorted_qs) : '');
+$str = $http_method . ':' . $path . (empty($sorted_qs) ? '' : ('?' . $sorted_qs));
 // => 'GET:/v0/public/pics/assets/otis-04.jpg?height=400&width=600'
 
 $sha1 = hash_hmac('sha1', $str, $secret, true);
@@ -981,6 +982,13 @@ If any request fails, the API will return an `error` object instead of `data`:
 
 The API will also set the response's [HTTP status code](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html) accordingly.
 
+### `ProtocolErr`
+
+| Type                       | Code  | Message                   |
+|:---------------------------|:------|:--------------------------|
+| `ProtocolHTTPRequiredErr`  | `403` | `protocol http required`  |
+| `ProtocolHTTPSRequiredErr` | `403` | `protocol https required` |
+
 ### `AuthErr`
 
 | Type                   | Code  | Message                          |
@@ -1045,6 +1053,7 @@ Changelog
 
 #### v0.1
 
+* 2014-08-04 - Clarify HMAC code and add ProtocolErr type
 * 2014-08-01 - Note CDN for public streams only
 * 2014-08-01 - Clarify period in bucket/object names
 * 2014-08-01 - Add TOC link to public endpoint
