@@ -8,7 +8,7 @@ Astra API Docs (v0.1)
 * content delivery via direct link or built-in CDN; and
 * flat rates for disk space and bandwidth (no tiers or additional API fees).
 
-The infrastructure behind Astra has powered [PhotoShelter](http://www.photoshelter.com/) for the last decade. Our distributed, redundant storage system currently handles billions of objects, comprising several petabytes of data.
+The infrastructure behind Astra has powered [PhotoShelter](http://www.photoshelter.com/) for the last decade. Our distributed, redundant storage system currently handles billions of objects, comprising several PBs of data.
 
 #### Contact
 
@@ -20,7 +20,7 @@ The infrastructure behind Astra has powered [PhotoShelter](http://www.photoshelt
 
 While tested and stable, this version of Astra is a **preview release** which we'll be actively expanding.
 
-We have plans for implementing usage endpoints, cache rulesets, auth tokens, query ranges/paging, and more. If there's an object type, transform, or other feature you need, please don't hesitate to [contact us](mailto:hello@astra.io).
+We have plans for implementing usage endpoints, cache rulesets, auth tokens, query ranges/paging, and more. If there's an object type, transform, or other feature you need, please [contact us](mailto:hello@astra.io).
 
 #### Contents
 
@@ -57,32 +57,32 @@ We have plans for implementing usage endpoints, cache rulesets, auth tokens, que
 API Overview
 ------------
 
-Astra organizes data using a bucket-object model. You can create unlimited buckets (which do not nest) in your account, provided they are uniquely named. Each bucket, in turn, can contain any number of objects whose names are unique to that bucket. Together, a bucket-object name tuple uniquely identifies a file.
+Astra organizes data using a bucket-object model. You can create unlimited buckets (which do not nest) in your account, provided they are uniquely named. Each bucket can contain any number of objects whose names are unique to it. Together, a bucket-object name tuple uniquely identifies a file.
 
-Objects in Astra are typed, with a generic `blob` type available as a catch-all. Types are required and determine what metadata the API computes for objects, as well as how they can be transformed and delivered.
+Objects in Astra are typed, with a generic `blob` type available as a catch-all. Types are required and determine what metadata the API computes for objects, as well as how they can be transformed.
 
-The RESTful API supports standard CRUD ops, authentication via shared secret or HMAC request signing, and serves data directly or via CDN. Except when streaming objects, the API returns JSON exclusively.
+The RESTful API supports standard CRUD ops, authentication via shared secret or HMAC signature, and serves data directly or via CDN. Except when streaming, the API returns JSON exclusively.
 
-We charge flat rates for storage and bandwidth; API calls are free and unlimited, except to guard against abuse.
+We charge for storage and bandwidth only; API calls are unlimited, except to guard against abuse.
 
 Versioning
 ----------
 
-API releases are indicated by major and minor version numbers. Specifying only the major version number always calls the most recent minor release. So, at present, `v0` points to `v0.1` (the latest `v0` release).
+API releases are indicated by major and minor version numbers. Specifying only the major version number always calls the most recent minor release. So, right now,`v0` points to `v0.1`.
 
 Your client can check the API version programmatically by calling the [`root`](#root) endpoint.
 
-Minor version updates may add fixes or small features but will always be backward-compatible. Any changes that break compatibility will be released as new major versions, to which you'll need to opt in.
+Minor version updates may add fixes or small features but will always be backward-compatible. Any changes that break compatibility will be released as new major versions, on an opt-in basis.
 
 Private Requests
 ----------------
 
-The simplest API requests you can make are private. Private requests are characterized by their use of:
+The simplest API requests you can make are private. Private requests use:
 
 * [HTTPS](https://en.wikipedia.org/wiki/HTTP_Secure); and
 * authentication via [shared secrets](https://en.wikipedia.org/wiki/Shared_secret) ([pre-shared keys](https://en.wikipedia.org/wiki/Pre-shared_key)).
 
-Private requests are most appropriate for server-side API clients. You should **not** make private requests in situations that would expose your account's secrets (over plain HTTP, in client-side code, and so on).
+Private requests are most appropriate for server-side API clients. You should **not** make private requests that would expose your account's secrets (over plain HTTP, in client-side code, and so on).
 
 ### Base URL
 
@@ -106,11 +106,11 @@ $ curl https://api.astra.io/v0/... \
 
 Future versions of the API may allow you to authenticate requests using tokens.
 
-You can maintain your account's shared secrets by logging into the [control panel](https://astra.io/panel/). In addition to adding and fully deleting secrets, you can also toggle their active statuses in order to disable them temporarily.
+You can maintain your account's secrets by logging into the [control panel](https://astra.io/panel/). In addition to adding and deleting secrets, you can also toggle their active statuses in order to disable them temporarily.
 
 ### Responses
 
-Except when streaming binary data, the Astra API returns JSON exclusively. All JSON responses, regardless of the resource being accessed, contain an `ok` boolean to say whether the request succeeded.
+Except when streaming binary data, the Astra API returns JSON exclusively. All JSON responses, regardless of the resource, contain an `ok` boolean to say whether the request succeeded.
 
 Requests for single resources return JSON objects under the `data` field:
 
@@ -151,7 +151,7 @@ In addition to private requests, the API also supports public requests. These re
 * often temporary, with lifetimes enforced using `expires` parameters; and
 * optionally delivered via built-in CDN.
 
-Signed, public requests are appropriate for client-side applications: serving images globally, handling third-party uploads, etc. In these situations, you would make and sign URLs server-side, then pass them to the front end.
+Public requests are appropriate for client-side use: serving images on web pages, handling user uploads, etc. In these cases, you would build URLs server-side and then pass them to the front end.
 
 Authentication using one-time tokens may be supported in future API versions.
 
@@ -171,13 +171,13 @@ To serve public requests via CDN, you can substitute `cdn` for `api` in the subd
 http://cdn.astra.io/v0/public/...
 ```
 
-The API supports delivery via CDN for public streaming requests only; metadata must be accessed directly.
+The API supports delivery via CDN for public streaming only; metadata must be accessed directly.
 
 ### HMAC Signatures
 
-HMAC-SHA1 signatures are used to verify the sources and integrity of public requests. Since changing signed URLs invalidates their signatures, signing "locks in" parameters, including `expires` fields and transform details.
+HMAC signatures are used to verify the sources and integrity of public requests. Since changing URLs invalidates their signatures, signing "locks in" parameters like `expires` fields and transforms.
 
-The API's method for constructing and signing messages is (in PHP-style pseudocode):
+The API's method for constructing [HMAC-SHA1](http://tools.ietf.org/html/rfc2104) signatures is (in PHP-style pseudocode):
 
 ```php
 function sign_request($http_method, $path, $percent_encoded_query_str=null, $secret)
@@ -198,33 +198,33 @@ You can then pass signatures with requests by adding `hmac={signature}` to their
 Entities
 --------
 
-Buckets and objects are the two entities you'll manipulate using the API's current endpoints. The list of entities will likely grow as we add support for rulesets, account configuration endpoints, and so on.
+Buckets and objects are the two entities you'll manipulate using the API's current endpoints. The list of entities will likely grow as we add support for rulesets, account configuration endpoints, etc.
 
 Entities have two standard JSON representations, called long and short forms:
 
-* Long-form representations list all attributes and are usually returned when interacting with a single entity.
-* Short-form representations are truncated versions, which are more appropriate for nesting (e.g., listing objects within buckets) or inclusion in lists of multiple entities, like query results.
+* Long forms list all attributes and are usually returned when interacting with a single entity.
+* Short forms are truncated versions, which are more appropriate for nesting (e.g., listing objects within buckets) or inclusion in lists of multiple entities, like query results.
 
 A few things to keep in mind when dealing with entity fields:
 
-* The API serves (`ctime` and `mtime` fields) and accepts timestamp strings in [RFC 3339](http://www.ietf.org/rfc/rfc3339.txt) format only. These timestamps must be UTC-offset, with second-level precision (e.g., `2014-08-30T14:28:56Z`).
-* All integers (e.g., `size` fields) are potentially 64-bit, which may cause problems for JavaScript clients.
-* Buckets and objects both have `status` fields which are always `ready`. We may create values in later API versions to handle async object processing, so filtering for `ready` will help future-proof clients.
+* The API serves and accepts timestamp strings in [RFC 3339](http://www.ietf.org/rfc/rfc3339.txt) format only. These timestamps must be UTC-offset, with second-level precision (e.g., `2014-08-30T14:28:56Z`).
+* All integers are potentially 64-bit, which may cause problems for JavaScript clients.
+* Buckets and objects both have `status` fields which are always `ready`. We may create values in later API versions to handle async processing, so filtering for `ready` is smart future-proofing.
 
 ### Buckets
 
-Buckets are containers for objects. They exist only one level deep (i.e., they cannot nest) and must be uniquely named within your account. Deleting buckets from Astra also deletes the objects they contain.
+Buckets are containers for objects. They cannot nest, and must be uniquely named within your account. Deleting buckets from Astra also deletes all the objects they contain.
 
 #### Long Form
 
 | Field     | Type      | Description                                                       |
 |:----------|:----------|:------------------------------------------------------------------|
-| `name`    | string    | 1-256 chars from `[A-Za-z0-9.\-_]` (cannot begin/end with `.`)    |
+| `name`    | string    | 1-256 chars from `[A-Za-z0-9.\-_]` (can't begin/end with `.`)     |
 | `size`    | integer   | total of all objects (in bytes)                                   |
 | `status`  | string    | `ready` (reserved for future use)                                 |
 | `objects` | array     | list of short-form objects                                        |
 | `ctime`   | timestamp | creation time                                                     |
-| `mtime`   | timestamp | modification time (does not inherit from objects)                 |
+| `mtime`   | timestamp | modification time (doesn't inherit from objects)                  |
 
 ```json
 {
@@ -258,7 +258,7 @@ Short-form buckets replace the `objects` array with an integer count:
 
 ### Objects
 
-Objects sit inside buckets and represent binary data (i.e., files you've uploaded), plus metadata the API has parsed. Types determine objects' metadata and transforms. A generic `blob` type can be used as a catch-all.
+Objects sit inside buckets and represent data you've uploaded, plus metadata the API has parsed. Types determine objects' metadata and transforms. A generic `blob` type can be used as a catch-all.
 
 You can identify objects in your account uniquely using bucket-object name tuples.
 
@@ -266,7 +266,7 @@ You can identify objects in your account uniquely using bucket-object name tuple
 
 | Field    | Type      | Description                                                      |
 |:---------|:----------|:-----------------------------------------------------------------|
-| `name`   | string    | 1-2048 chars from `[A-Za-z0-9.\-_]` (cannot begin/end with `.`)  |
+| `name`   | string    | 1-2048 chars from `[A-Za-z0-9.\-_]` (can't begin/end with `.`)   |
 | `bucket` | string    | name of parent bucket                                            |
 | `hash`   | string    | [SHA-1](https://en.wikipedia.org/wiki/SHA-1) hash (40 hex chars) |
 | `size`   | integer   | size (in bytes)                                                  |
@@ -280,9 +280,9 @@ You can identify objects in your account uniquely using bucket-object name tuple
 
 Type-specific fields:
 
-| Field     | Type   | Description                                                          |
-|:----------|:-------|:---------------------------------------------------------------------|
-| `content` | string | HTTP `Content-Type` (`[A-Za-z0-9\-]+\/[A-Za-z0-9\-]`) (may be empty) |
+| Field     | Type   | Description                                                           |
+|:----------|:-------|:----------------------------------------------------------------------|
+| `content` | string | HTTP `Content-Type` (`[A-Za-z0-9\-]+\/[A-Za-z0-9\-]+`) (may be empty) |
 
 ```json
 {
@@ -339,9 +339,9 @@ Regardless of type, short-form objects consist of a `name` field only:
 Endpoints
 ---------
 
-The Astra API uses a [RESTful](https://en.wikipedia.org/wiki/Representational_state_transfer) structure, organizing [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operations on entities around [HTTP methods](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html). (Absent a true `PATCH` verb, the API uses `POST` requests for both creating and updating entities.)
+The Astra API uses a [RESTful](https://en.wikipedia.org/wiki/Representational_state_transfer) structure, organizing [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operations on entities around [HTTP methods](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html). (Absent a true `PATCH` verb, the API uses `POST` for both creating and updating entities.)
 
-You can pass required or optional parameters as multipart form data (type: `multipart/form-data`). Additionally, query strings are used for setting request-specific info, such as transform details or [HMAC](https://en.wikipedia.org/wiki/Hash-based_message_authentication_code) signatures.
+You can pass required or optional parameters as multipart form data (`multipart/form-data`). Query strings are used for setting request-specific info, like transform details or [HMAC](https://en.wikipedia.org/wiki/Hash-based_message_authentication_code) signatures.
 
 Currently, the API supports only ASCII values in form data, and requires timestamps to be in [RFC 3339](http://www.ietf.org/rfc/rfc3339.txt) format (relative to UTC) with second-level precision (e.g., `2014-08-30T14:28:56Z`). 
 
@@ -389,7 +389,7 @@ $ curl https://api.astra.io/v0/ \
 
 ### `bucket`
 
-The `bucket` endpoint lets you maintain buckets. Remember that deleting buckets also deletes their contents.
+The `bucket` endpoint lets you maintain buckets. Note that deleting buckets deletes their contents.
 
 #### Scheme
 
@@ -837,7 +837,7 @@ $ curl https://api.astra.io/v0/bucket/testBucket/object/static.min.js \
 
 ### `stream`
 
-The `stream` endpoint delivers objects as binary data. To act on objects as entities, use the [`object`](#object) endpoint.
+The `stream` endpoint delivers objects as binary data. To act on objects, use the [`object`](#object) endpoint.
 
 #### Scheme
 
@@ -882,7 +882,7 @@ The `public` endpoint aliases certain [`object`](#object) and [`stream`](#stream
     * *form fields are forwarded to aliased endpoints*
 * Query string:
     * *query strings are forwarded to aliased endpoints*
-    * `hmac` - SHA-1 HMAC signature
+    * `hmac` - HMAC-SHA1 signature
     * [`expires`] - percent-encoded [RFC 3339](http://www.ietf.org/rfc/rfc3339.txt) timestamp (optional)
 
 (Refer to the section on [HMAC signatures](#hmac-signatures) to learn the algorithm for signing messages.)
@@ -907,7 +907,7 @@ The `public` endpoint aliases certain [`object`](#object) and [`stream`](#stream
 
 #### `public` Read
 
-(This aliases the [`stream` read](#stream-read) endpoint; appending `?metadata=true` aliases the [`object` read](#object-read) endpoint.)
+(This aliases the [`stream` read](#stream-read) endpoint; appending `?metadata=true` aliases [`object` read](#object-read).)
 
 Resize and serve `otis-04.jpg` from bucket `assets` (in account `pics`) via CDN:
 
@@ -1057,6 +1057,7 @@ Changelog
 
 #### v0.1
 
+* 2014-08-06 - Fix blob content field regex; other cleanups
 * 2014-08-04 - Update header and link to control panel
 * 2014-08-04 - Clarify HMAC code and add ProtocolErr type
 * 2014-08-01 - Note CDN for public streams only
