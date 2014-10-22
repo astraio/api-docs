@@ -1,10 +1,10 @@
-Astra API Docs (v0.1)
+Astra API Docs (v0.2)
 =====================
 
 [Astra](https://astra.io/) is a modern cloud platform for storing, transforming, and delivering media. The system includes:
 
 * key-value storage for static files, with type info (image, generic blob, etc.);
-* type-specific transforms (e.g., image resizing), which can be applied on the fly;
+* type-specific transforms (e.g., image resizing, video cutting), which can be applied on the fly;
 * content delivery via direct link or built-in CDN; and
 * flat rates for disk space and bandwidth (no tiers or additional API fees).
 
@@ -47,7 +47,6 @@ We have plans for implementing usage endpoints, cache rulesets, auth tokens, que
     * [`ProtocolErr`](#protocolerr)
     * [`AuthErr`](#autherr)
     * [`FormErr`](#formerr)
-    * [`AccountErr`](#accounterr)
     * [`BucketErr`](#bucketerr)
     * [`ObjectErr`](#objecterr)
     * [`InternalErr`](#internalerr)
@@ -68,7 +67,7 @@ We charge for storage and bandwidth only; API calls are unlimited, except to gua
 Versioning
 ----------
 
-API releases are indicated by major and minor version numbers. Specifying only the major version number always calls the most recent minor release. So, right now,`v0` points to `v0.1`.
+API releases are indicated by major and minor version numbers. Specifying only the major version number always calls the most recent minor release. So right now `v0` points to `v0.2`.
 
 Your client can check the API version programmatically by calling the [`root`](#root) endpoint.
 
@@ -92,7 +91,7 @@ The base URL for private requests, which are served directly, is currently:
 https://api.astra.io/v0/
 ```
 
-(You can substitute `v0.1` for `v0` to target the minor version specifically.)
+(You can substitute `v0.2` for `v0` to target the minor version specifically.)
 
 ### Secret-Based Authentication
 
@@ -127,7 +126,7 @@ When the API returns multiple resources, `data` is an array of objects:
 {
     "ok": true,
     "data": [
-        ...
+        ...,
         { ... },
         ...
     ]
@@ -217,14 +216,14 @@ Buckets are containers for objects. They cannot nest, and must be uniquely named
 
 #### Long Form
 
-| Field     | Type      | Description                                                       |
-|:----------|:----------|:------------------------------------------------------------------|
-| `name`    | string    | 1-256 chars from `[A-Za-z0-9.\-_]` (can't begin/end with `.`)     |
-| `size`    | integer   | total of all objects (in bytes)                                   |
-| `status`  | string    | `ready` (reserved for future use)                                 |
-| `objects` | array     | list of short-form objects                                        |
-| `ctime`   | timestamp | creation time                                                     |
-| `mtime`   | timestamp | modification time (doesn't inherit from objects)                  |
+| Field     | Type      | Description                                                   |
+|:----------|:----------|:--------------------------------------------------------------|
+| `name`    | string    | 1-256 chars from `[A-Za-z0-9.\-_]` (can't begin/end with `.`) |
+| `size`    | integer   | total of all objects (in bytes)                               |
+| `status`  | string    | `ready` (reserved for future use)                             |
+| `objects` | array     | list of short-form objects                                    |
+| `ctime`   | timestamp | creation time                                                 |
+| `mtime`   | timestamp | modification time (doesn't inherit from objects)              |
 
 ```json
 {
@@ -280,19 +279,19 @@ You can identify objects in your account uniquely using bucket-object name tuple
 
 Type-specific fields:
 
-| Field     | Type   | Description                                                           |
-|:----------|:-------|:----------------------------------------------------------------------|
-| `content` | string | HTTP `Content-Type` (`[A-Za-z0-9\-]+\/[A-Za-z0-9\-]+`) (may be empty) |
+| Field     | Type   | Description                                                      |
+|:----------|:-------|:-----------------------------------------------------------------|
+| `content` | string | `Content-Type` (`[A-Za-z0-9\-]+\/[A-Za-z0-9\-]+`) (may be empty) |
 
 ```json
 {
-    "name": "someBlobObject.mp4",
+    "name": "blobObject.pdf",
     "bucket": "someBucket",
     "hash": "1a5699e83a1d4aaf7a23ddb5e9f0a8979d0007d8",
-    "size": 903872312,
+    "size": 9381224,
     "type": "blob",
     "status": "ready",
-    "content": "video/mp4",
+    "content": "application/pdf",
     "ctime": "2014-07-28T14:42:27Z",
     "mtime": "2014-07-28T14:42:27Z"
 }
@@ -310,7 +309,7 @@ Type-specific fields:
 
 ```json
 {
-    "name": "someImageObject.jpg",
+    "name": "imageObject.jpg",
     "bucket": "someBucket",
     "hash": "dc53baf6000a0b7d3ef55afe86a7f48fc16c5373",
     "size": 1845778,
@@ -324,16 +323,50 @@ Type-specific fields:
 }
 ```
 
+##### `video` Objects
+
+Type-specific fields:
+
+| Field      | Type    | Description                       |
+|:-----------|:--------|:----------------------------------|
+| `format`   | string  | currently `mp4`, `ogg`, or `webm` |
+| `width`    | integer | video width (in pixels)           |
+| `height`   | integer | video height (in pixels)          |
+| `start`    | float   | video start (in seconds)          |
+| `duration` | float   | video duration (in seconds)       |
+
+```json
+{
+    "name": "videoObject.mp4",
+    "bucket": "someBucket",
+    "hash": "06e786af81f20f7d31ba34fb0a5e92b0e7c4ff19",
+    "size": 99476300,
+    "type": "video",
+    "status": "ready",
+    "format": "mp4",
+    "width": 1280,
+    "height": 720,
+    "start": 0,
+    "duration": 112.831667,
+    "ctime": "2014-11-16T20:22:58Z",
+    "mtime": "2014-11-16T20:22:58Z"
+}
+```
+
 #### Short Form
 
 Regardless of type, short-form objects consist of a `name` field only:
 
 ```json
-{"name": "someBlobObject.mp4"}
+{"name": "blobObject.pdf"}
 ```
 
 ```json
-{"name": "someImageObject.jpg"}
+{"name": "imageObject.jpg"}
+```
+
+```json
+{"name": "videoObject.mp4"}
 ```
 
 Endpoints
@@ -852,17 +885,11 @@ The `stream` endpoint delivers objects as binary data. To act on objects, use th
 * Form fields: *n/a*
 * Query string:
     * if `image`:
-        * [`width` & `height`] - resize in pixels (optional)
-
-Stream a `blob` object named `skatepark0501.mp4` from bucket `content`:
-
-```bash
-$ curl https://api.astra.io/v0/bucket/content/stream/skatepark0501.mp4 \
-    -H 'Astra-Secret: 3jaX4Bls9rxCiqSYfv5FaRMbfqff2Vh7' \
-    -X GET
-```
-
-=> *object streams with `Content-Type: video/mp4` header*
+        * [`width` and `height`] - resize in pixels (integers, optional)
+        * [`orient=true`] - apply EXIF orientation on output (boolean, optional)
+    * if `video`:
+        * [`width` and `height`] - resize in pixels (integers, optional)
+        * [`start` and/or `end`] - cut from start/end in seconds (floats, optional)
 
 Resize and serve an `image` object named `lol.gif` from bucket `content`:
 
@@ -873,6 +900,26 @@ $ curl 'https://api.astra.io/v0/bucket/content/stream/lol.gif?width=400&height=3
 ```
 
 => *object streams with `Content-Type: image/gif` header*
+
+Correctly orient and output an `image` object named `iPhone.jpg` from bucket `content`:
+
+```bash
+$ curl https://api.astra.io/v0/bucket/content/stream/iPhone.jpg?orient=true \
+    -H 'Astra-Secret: 3jaX4Bls9rxCiqSYfv5FaRMbfqff2Vh7' \
+    -X GET
+```
+
+=> *object streams with `Content-Type: image/jpeg` header*
+
+Stream a segment of a `video` object named `skatepark0501.mp4` from bucket `content`:
+
+```bash
+$ curl 'https://api.astra.io/v0/bucket/content/stream/skatepark0501.mp4?start=10&end=24' \
+    -H 'Astra-Secret: 3jaX4Bls9rxCiqSYfv5FaRMbfqff2Vh7' \
+    -X GET
+```
+
+=> *object streams with `Content-Type: video/mp4` header*
 
 ### `public`
 
@@ -1012,12 +1059,6 @@ The API will also set the response's [HTTP status code](http://www.w3.org/Protoc
 
 (A `FormErr` indicates a problem with the HTML form data sent to an endpoint.)
 
-### `AccountErr`
-
-| Type                 | Code  | Message                                       |
-|:---------------------|:------|:----------------------------------------------|
-| `AccountNotFoundErr` | `404` | `account with label '{acct_label}' not found` |
-
 ### `BucketErr`
 
 | Type                     | Code  | Message                              |
@@ -1038,9 +1079,17 @@ The API will also set the response's [HTTP status code](http://www.w3.org/Protoc
 
 #### `ObjectImageErr`
 
-| Type                   | Code  | Message                          |
-|:-----------------------|:------|:---------------------------------|
-| `ObjectImageFormatErr` | `400` | `image format not yet supported` |
+| Type                   | Code  | Message                                   |
+|:-----------------------|:------|:------------------------------------------|
+| `ObjectImageFormatErr` | `400` | `image type does not support this format` |
+| `ObjectImageEmptyErr`  | `400` | `file empty or image has no width/height` |
+
+#### `ObjectVideoErr`
+
+| Type                   | Code  | Message                                                |
+|:-----------------------|:------|:-------------------------------------------------------|
+| `ObjectImageFormatErr` | `400` | `video type does not support this format`              |
+| `ObjectImageEmptyErr`  | `400` | `file empty or first video stream has no width/height` |
 
 ### `InternalErr`
 
@@ -1054,6 +1103,10 @@ Changelog
 ---------
 
 ### v0
+
+#### v0.2
+
+* 2014-10-22 - Add video type support; orient flag for images
 
 #### v0.1
 
