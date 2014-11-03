@@ -25,7 +25,7 @@ We have plans for implementing usage endpoints, cache rulesets, auth tokens, que
 #### Contents
 
 * [API Overview](#api-overview)
-* [Versioning](#versioning)
+    * [Versioning](#versioning)
 * [Private Requests](#private-requests)
     * [Base URL](#base-url)
     * [Secret-Based Authentication](#secret-based-authentication)
@@ -43,6 +43,10 @@ We have plans for implementing usage endpoints, cache rulesets, auth tokens, que
     * [`object`](#object)
     * [`stream`](#stream)
     * [`public`](#public)
+* [Transforms](#transforms)
+    * [`blob` Object](#blob-object)
+    * [`image` Object](#image-object)
+    * [`video` Object](#video-object)
 * [Errors](#errors)
     * [`ProtocolErr`](#protocolerr)
     * [`AuthErr`](#autherr)
@@ -64,8 +68,7 @@ The RESTful API supports standard CRUD ops, authentication via shared secret or 
 
 We charge for storage and bandwidth only; API calls are unlimited, except to guard against abuse.
 
-Versioning
-----------
+### Versioning
 
 API releases are indicated by major and minor version numbers. Specifying only the major version number always calls the most recent minor release. So right now `v0` points to `v0.2`.
 
@@ -174,7 +177,7 @@ The API supports delivery via CDN for public streaming only; metadata must be ac
 
 ### HMAC Signatures
 
-HMAC signatures are used to verify the sources and integrity of public requests. Since changing URLs invalidates their signatures, signing "locks in" parameters like `expires` fields and transforms.
+HMAC signatures are used to verify the sources and integrity of public requests. Since changing URLs invalidates their signatures, signing "locks in" parameters like `expires` fields and [transforms](#transforms).
 
 The API's method for constructing [HMAC-SHA1](http://tools.ietf.org/html/rfc2104) signatures is (in PHP-style pseudocode):
 
@@ -188,7 +191,7 @@ function sign_request($http_method, $path, $percent_encoded_query_str=null, $sec
     $str = $http_method . ':' . $path . (empty($sorted_qs) ? '' : ('?' . $sorted_qs));
     $sha1 = hash_hmac('sha1', $str, $secret, true); // as raw binary data
 
-    return rtrim(strtr(base64_encode($sha1), '+/', '-_'), '='); // unpadded base64url-style sig
+    return rtrim(strtr(base64_encode($sha1), '+/', '-_'), '='); // unpadded base64url sig
 }
 ```
 
@@ -257,7 +260,7 @@ Short-form buckets replace the `objects` array with an integer count:
 
 ### Objects
 
-Objects sit inside buckets and represent data you've uploaded, plus metadata the API has parsed. Types determine objects' metadata and transforms. A generic `blob` type can be used as a catch-all.
+Objects sit inside buckets and represent data you've uploaded, plus metadata the API has parsed. Types determine objects' metadata and [transforms](#transforms). A generic `blob` type can be used as a catch-all.
 
 You can identify objects in your account uniquely using bucket-object name tuples.
 
@@ -394,8 +397,8 @@ The `root` pseudo-endpoint is located at the API base and returns info about the
 
 * Method: `GET`
 * Path: `/`
-* Form fields: *n/a*
-* Query string: *n/a*
+
+**Example**
 
 Fetch the API version programmatically, which is useful if you're specifying only major revisions:
 
@@ -440,7 +443,8 @@ The `bucket` endpoint lets you maintain buckets. Note that deleting buckets dele
 * Path: `/bucket`
 * Form fields:
     * `name` - bucket name
-* Query string: *n/a*
+
+**Example**
 
 Make a new bucket called `fooBucket`:
 
@@ -471,8 +475,8 @@ $ curl https://api.astra.io/v0/bucket \
 
 * Method: `GET`
 * Path: `/bucket`
-* Form fields: *n/a*
-* Query string: *n/a*
+
+**Example**
 
 List all the buckets in your account:
 
@@ -514,8 +518,8 @@ $ curl https://api.astra.io/v0/bucket \
 
 * Method: `GET`
 * Path: `/bucket/{bkt_name}`
-* Form fields: *n/a*
-* Query string: *n/a*
+
+**Example**
 
 Fetch a bucket named `uploads`:
 
@@ -550,7 +554,8 @@ $ curl https://api.astra.io/v0/bucket/uploads \
 * Path: `/bucket/{bkt_name}`
 * Form fields:
     * [`name`] - new bucket name (optional)
-* Query string: *n/a*
+
+**Example**
 
 Rename `fooBucket` to `barBucket`:
 
@@ -581,8 +586,8 @@ $ curl https://api.astra.io/v0/bucket/fooBucket \
 
 * Method: `DELETE`
 * Path: `/bucket/{bkt_name}`
-* Form fields: *n/a*
-* Query string: *n/a*
+
+**Example**
 
 Remove `barBucket` (including any objects inside) from your account:
 
@@ -624,7 +629,8 @@ Use this endpoint to act on objects as entities. If you need to stream them, use
     * `file` - binary data
     * if `blob`:
         * [`content`] - `Content-Type` for streaming (optional)
-* Query string: *n/a*
+
+**Example 1**
 
 Upload a new `blob` object named `static.js` to `testBucket`:
 
@@ -656,6 +662,8 @@ $ curl https://api.astra.io/v0/bucket/testBucket/object \
     }
 }
 ```
+
+**Example 2**
 
 Make a new `image` object called `hawaii.jpg` in `testBucket`:
 
@@ -693,8 +701,8 @@ $ curl https://api.astra.io/v0/bucket/testBucket/object \
 
 * Method: `GET`
 * Path: `/bucket/{bkt_name}/object`
-* Form fields: *n/a*
-* Query string: *n/a*
+
+**Example**
 
 List all the objects in `testBucket`:
 
@@ -744,8 +752,8 @@ $ curl https://api.astra.io/v0/bucket/testBucket/object \
 
 * Method: `GET`
 * Path: `/bucket/{bkt_name}/object/{obj_name}`
-* Form fields: *n/a*
-* Query string: *n/a*
+
+**Example**
 
 Fetch an `image` object called `hawaii.jpg` from `testBucket`:
 
@@ -786,7 +794,8 @@ $ curl https://api.astra.io/v0/bucket/testBucket/object/hawaii.jpg \
     * [`file`] - new binary data (required if new `type`; otherwise optional)
     * if `blob`:
         * [`content`] - new `Content-Type` for streaming (optional)
-* Query string: *n/a*
+
+**Example 1**
 
 Update a `blob` object named `static.js` in `testBucket`:
 
@@ -816,6 +825,8 @@ $ curl https://api.astra.io/v0/bucket/testBucket/object/static.js \
     }
 }
 ```
+
+**Example 2**
 
 Upload a new `image` to replace `hawaii.jpg` in `testBucket`:
 
@@ -851,8 +862,8 @@ $ curl https://api.astra.io/v0/bucket/testBucket/object/hawaii.jpg \
 
 * Method: `DELETE`
 * Path: `/bucket/{bkt_name}/object/{obj_name}`
-* Form fields: *n/a*
-* Query string: *n/a*
+
+**Example**
 
 Remove `blob` object `static.min.js` from `testBucket`:
 
@@ -882,44 +893,10 @@ The `stream` endpoint delivers objects as binary data. To act on objects, use th
 
 * Method: `GET`
 * Path: `/bucket/{bkt_name}/stream/{obj_name}`
-* Form fields: *n/a*
 * Query string:
-    * if `image`:
-        * [`width` and `height`] - resize in pixels (integers, optional)
-        * [`orient=true`] - apply EXIF orientation on output (boolean, optional)
-    * if `video`:
-        * [`width` and `height`] - resize in pixels (integers, optional)
-        * [`start` and/or `end`] - cut from start/end in seconds (floats, optional)
+    * *type-specific transforms*
 
-Resize and serve an `image` object named `lol.gif` from bucket `content`:
-
-```bash
-$ curl 'https://api.astra.io/v0/bucket/content/stream/lol.gif?width=400&height=300' \
-    -H 'Astra-Secret: 3jaX4Bls9rxCiqSYfv5FaRMbfqff2Vh7' \
-    -X GET
-```
-
-=> *object streams with `Content-Type: image/gif` header*
-
-Correctly orient and output an `image` object named `iPhone.jpg` from bucket `content`:
-
-```bash
-$ curl https://api.astra.io/v0/bucket/content/stream/iPhone.jpg?orient=true \
-    -H 'Astra-Secret: 3jaX4Bls9rxCiqSYfv5FaRMbfqff2Vh7' \
-    -X GET
-```
-
-=> *object streams with `Content-Type: image/jpeg` header*
-
-Stream a segment of a `video` object named `skatepark0501.mp4` from bucket `content`:
-
-```bash
-$ curl 'https://api.astra.io/v0/bucket/content/stream/skatepark0501.mp4?start=10&end=24' \
-    -H 'Astra-Secret: 3jaX4Bls9rxCiqSYfv5FaRMbfqff2Vh7' \
-    -X GET
-```
-
-=> *object streams with `Content-Type: video/mp4` header*
+(Refer to the section on [transforms](#transforms) for streaming examples, including on-the-fly modifications.)
 
 ### `public`
 
@@ -956,6 +933,8 @@ The `public` endpoint aliases certain [`object`](#object) and [`stream`](#stream
 
 (This aliases the [`stream` read](#stream-read) endpoint; appending `?metadata=true` aliases [`object` read](#object-read).)
 
+**Example 1**
+
 Resize and serve `otis-04.jpg` from bucket `assets` (in account `pics`) via CDN:
 
 ```php
@@ -979,7 +958,9 @@ $ curl 'http://cdn.astra.io/v0/public/pics/assets/otis-04.jpg?width=600&height=4
     -X GET
 ```
 
-=> *object streams via CDN with `Content-Type: image/jpeg` header*
+=> *image streams via CDN as `Content-Type: image/jpeg`*
+
+**Example 2**
 
 Stream `client.js` directly from bucket `js` (in account `code`) with expiration:
 
@@ -1005,7 +986,7 @@ $ curl 'http://api.astra.io//v0/public/code/js/client.js?expires=2014-06-01T12%3
     -X GET
 ```
 
-=> *object streams directly with `Content-Type: application/javascript` header*
+=> *blob streams directly as `Content-Type: application/javascript`*
 
 #### `public` Update
 
@@ -1014,6 +995,152 @@ $ curl 'http://api.astra.io//v0/public/code/js/client.js?expires=2014-06-01T12%3
 #### `public` Delete
 
 (This aliases [`object` delete](#object-delete) endpoint.)
+
+Transforms
+----------
+
+Transforms are object manipulations (image resizing, video cutting, etc.) that the API can perform on the fly. Transformed objects are cached, so subsequent calls with the same parameters incur no cost.
+
+You can apply transforms by modifying the query strings you pass to the [`stream`](#stream) and [`public`](#public) endpoints. Note that transforms never modify the original objects you've uploaded.
+
+Right now transforms cannot be combined. In the future, you'll be able to apply transforms in series.
+
+### `blob` Object
+
+*n/a*
+
+### `image` Object
+
+#### Resize Up & Down
+
+| Field    | Type               | Description                             |
+|:---------|:-------------------|:----------------------------------------|
+| `width`  | integer            | image width (in pixels)                 |
+| `height` | integer            | image height (in pixels)                |
+| `mode`   | string (optional)  | `fill` or `fit` sizing                  |
+| `orient` | boolean (optional) | apply EXIF orientation to `jpeg` images |
+
+Both `width` and `height` are required if `mode` is not set (arbitrary resize), or if `mode` is set to `fill`. If `mode` is `fit`, then either `width` or `height` must be set (and `width` takes precedence if both).
+
+The `orient` flag can be used with any resize operation on `jpeg` images. It's particularly useful when dealing with media uploaded from mobile devices, whose cameras often don't rotate images.
+
+Dimensions for scaling up images are currently capped at 10,000 px each.
+
+**Example 1**
+
+Resize an image arbitrarily and serve directly:
+
+```bash
+$ curl 'https://api.astra.io/v0/bucket/content/stream/lol.gif?width=320&height=260' \
+    -H 'Astra-Secret: 3jaX4Bls9rxCiqSYfv5FaRMbfqff2Vh7' \
+    -X GET
+```
+
+=> *image streams directly as `Content-Type: image/gif`*
+
+**Example 2**
+
+Correctly orient an image named `iPhone.jpg`, which has rotation EXIF data:
+
+```bash
+$ curl https://api.astra.io/v0/bucket/content/stream/iPhone.jpg?orient=true \
+    -H 'Astra-Secret: 3jaX4Bls9rxCiqSYfv5FaRMbfqff2Vh7' \
+    -X GET
+```
+
+=> *image streams directly as `Content-Type: image/jpeg`*
+
+**Example 3**
+
+Orient an image (in account `biz`) and resize to completely fill a 400x400 bounding box:
+
+```bash
+$ curl 'http://cdn.astra.io/v0/public/biz/dogpics/zoe2.jpg?orient=true&mode=fill&width=400&height=400&expires=2015-01-14T16%3A30%3A00Z&hmac=yuEreJMqExv0A96Iu-HYAzMVo60' \
+    -X GET
+```
+
+=> *image streams via CDN as `Content-Type: image/jpeg` until `2015-01-14T16:30:00Z`*
+
+**Example 4**
+
+Resize an image to fit a bounding box 320 px wide, keeping its aspect ratio, and download it:
+
+```bash
+$ curl 'https://api.astra.io/v0/bucket/bikes/stream/fixie08.jpg?mode=fit&width=320' \
+    -H 'Astra-Secret: 3jaX4Bls9rxCiqSYfv5FaRMbfqff2Vh7' \
+    -X GET \
+    > /path/to/local/file/fixie08-resized.jpg
+```
+
+=> *image saves locally as `fixie08-resized.jpg`*
+
+### `video` Object
+
+#### Resize Down
+
+| Field    | Type    | Description              |
+|:---------|:--------|:-------------------------|
+| `width`  | integer | video width (in pixels)  |
+| `height` | integer | video height (in pixels) |
+
+Both `width` and `height` parameters are required, and the maximum downsizing factor is 60x in both dimensions (e.g., a video 600 px wide can be scaled down no smaller than 10 px wide). Also, the `width` and `height` for `mp4`-format videos must be a multiple of 2 based on the encoder used.
+
+**Example 1**
+
+Resize a large video to 640x480 and download it:
+
+```bash
+$ curl 'https://api.astra.io/v0/bucket/doge/stream/wow.mp4?width=640&height=480' \
+    -H 'Astra-Secret: 3jaX4Bls9rxCiqSYfv5FaRMbfqff2Vh7' \
+    -X GET \
+    > /path/to/local/file/wow-resized.mp4
+```
+
+=> *video saves locally as `wow-resized.mp4`*
+
+**Example 2**
+
+Resize a video and stream it publicly (from account `media`) with an expiration time:
+
+```bash
+$ curl 'http://api.astra.io/v0/public/media/web/X9qAkz.ogg?width=150&height=75&expires=2015-02-18T12%3A00%3A00Z&hmac=PhdpwhJ1uYdgVFXvw5v89yab2XM' \
+    -X GET
+```
+
+=> *video streams directly as `Content-Type: video/webm`* until `2015-02-18T12:00:00Z`
+
+#### Cut Segment
+
+| Field   | Type  | Description                     |
+|:--------|:------|:--------------------------------|
+| `start` | float | segment start time (in seconds) |
+| `end`   | float | segment end time (in seconds)   |
+
+The `start` and `end` parameters default to 0 and the duration of the video, respectively, if omitted.
+
+**Example 1**
+
+Cut a 28.25-second segment from a video (in account `biz`) and stream it publicly via CDN:
+
+```bash
+$ curl 'http://cdn.astra.io/v0/public/biz/footage/interview3.webm?start=2&end=30.25&hmac=3syfFCpZR-PgoyJ_QN7kITd7Fyk' \
+    -X GET
+```
+
+=> *video streams via CDN as `Content-Type: video/webm`*
+
+**Example 2**
+
+Trim 3.5 seconds from the beginning of a video and download it:
+
+```bash
+$ curl https://api.astra.io/v0/bucket/ocean-uncut/stream/waves.ogg?start=3.5 \
+    -H 'Astra-Secret: 3jaX4Bls9rxCiqSYfv5FaRMbfqff2Vh7' \
+    -X GET \
+    > /path/to/local/file/waves-cut.ogg
+```
+
+=> *video saves locally as `waves-cut.ogg`*
 
 Errors
 ------
@@ -1106,6 +1233,7 @@ Changelog
 
 #### v0.2
 
+* 2014-11-03 - Break out transforms; move section on versioning
 * 2014-10-22 - Add video type support; orient flag for images
 
 #### v0.1
