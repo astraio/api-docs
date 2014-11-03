@@ -272,7 +272,7 @@ You can identify objects in your account uniquely using bucket-object name tuple
 | `bucket` | string    | name of parent bucket                                            |
 | `hash`   | string    | [SHA-1](https://en.wikipedia.org/wiki/SHA-1) hash (40 hex chars) |
 | `size`   | integer   | size (in bytes)                                                  |
-| `type`   | string    | currently `blob` or `image`                                      |
+| `type`   | string    | currently `blob`, `image`, or `video`                            |
 |  *...*   | *...*     | *type-specific fields*                                           |
 | `status` | string    | `ready` (reserved for future use)                                |
 | `ctime`  | timestamp | creation time                                                    |
@@ -415,9 +415,9 @@ $ curl https://api.astra.io/v0/ \
     "ok": true,
     "data": {
         "version": {
-            "string": "0.1",
+            "string": "0.2",
             "major": 0,
-            "minor": 1
+            "minor": 2
         }
     }
 }
@@ -1233,6 +1233,7 @@ Changelog
 
 #### v0.2
 
+* 2014-11-03 - Bump version in root; revise long-form object types
 * 2014-11-03 - Break out transforms; move section on versioning
 * 2014-10-22 - Add video type support; orient flag for images
 
