@@ -883,6 +883,8 @@ $ curl https://api.astra.io/v0/bucket/testBucket/object/static.min.js \
 
 The `stream` endpoint delivers objects as binary data. To act on objects, use the [`object`](#object) endpoint.
 
+You can apply [transforms](#transforms) when streaming by adding optional parameters via query string.
+
 #### Scheme
 
 | Action               | Method | Path                                   |
@@ -896,7 +898,19 @@ The `stream` endpoint delivers objects as binary data. To act on objects, use th
 * Query string:
     * *type-specific transforms*
 
-(Refer to the section on [transforms](#transforms) for streaming examples, including on-the-fly modifications.)
+(Refer to the section on [transforms](#transforms) for examples of on-the-fly modifications.)
+
+**Example**
+
+Serve an image called `foo.png` directly, without applying any transforms:
+
+```bash
+$ curl 'https://api.astra.io/v0/bucket/content/stream/foo.png' \
+    -H 'Astra-Secret: 3jaX4Bls9rxCiqSYfv5FaRMbfqff2Vh7' \
+    -X GET
+```
+
+=> *image streams directly as `Content-Type: image/png`*
 
 ### `public`
 
@@ -931,7 +945,7 @@ The `public` endpoint aliases certain [`object`](#object) and [`stream`](#stream
 
 #### `public` Read
 
-(This aliases the [`stream` read](#stream-read) endpoint; appending `?metadata=true` aliases [`object` read](#object-read).)
+(This aliases the [`stream` read](#stream-read) endpoint; appending `?metadata=true` aliases [`object` read](#object-read). As an alias to the [`stream` read](#stream-read) endpoint, you can sign in on-the-fly [transforms](#transforms) via query string.)
 
 **Example 1**
 
@@ -1233,6 +1247,7 @@ Changelog
 
 #### v0.2
 
+* 2014-11-03 - Add back vanilla object stream example
 * 2014-11-03 - Bump version in root; revise long-form object types
 * 2014-11-03 - Break out transforms; move section on versioning
 * 2014-10-22 - Add video type support; orient flag for images
