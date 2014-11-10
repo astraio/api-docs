@@ -789,6 +789,7 @@ $ curl https://api.astra.io/v0/bucket/testBucket/object/hawaii.jpg \
 * Method: `POST`
 * Path: `/bucket/{bkt_name}/object/{obj_name}`
 * Form fields:
+    * [`bucket`] - move object to new bucket (optional)
     * [`name`] - new object name (optional)
     * [`type`] - new object type (optional)
     * [`file`] - new binary data (required if new `type`; otherwise optional)
@@ -1247,6 +1248,7 @@ Changelog
 
 #### v0.2
 
+* 2014-11-10 - Note that update can be used to move objects
 * 2014-11-03 - Add back vanilla object stream example
 * 2014-11-03 - Bump version in root; revise long-form object types
 * 2014-11-03 - Break out transforms; move section on versioning
