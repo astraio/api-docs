@@ -1035,7 +1035,9 @@ Right now transforms cannot be combined. In the future, you'll be able to apply 
 | `mode`   | string (optional)  | `fill` or `fit` sizing                  |
 | `orient` | boolean (optional) | apply EXIF orientation to `jpeg` images |
 
-Both `width` and `height` are required if `mode` is not set (arbitrary resize), or if `mode` is set to `fill`. If `mode` is `fit`, then either `width` or `height` must be set (and `width` takes precedence if both).
+The `fill` parameter resizes an image to completely fill a bounding box whose dimensions you specify. The image's aspect ratio will be maintained, though the image may be cropped in order to fill the box. Specifying `fit` is similar, except the image will not be cropped and thus may not fill the box.
+
+Both `width` and `height` are required if `mode` is not set (an arbitrary resize, which may distort the image), or if `mode` is set to `fill`. If `mode` is `fit`, then either `width` or `height` must be set.
 
 The `orient` flag can be used with any resize operation on `jpeg` images. It's particularly useful when dealing with media uploaded from mobile devices, whose cameras often don't rotate images.
 
@@ -1248,6 +1250,7 @@ Changelog
 
 #### v0.2
 
+* 2014-11-14 - Clarify image resizing options
 * 2014-11-10 - Note that update can be used to move objects
 * 2014-11-03 - Add back vanilla object stream example
 * 2014-11-03 - Bump version in root; revise long-form object types
