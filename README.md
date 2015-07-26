@@ -1,3 +1,10 @@
+Development Ended
+-----------------
+
+Please note that we've ended development on Astra. While these docs will remain online for reference, we're no longer accepting new trials and will be working to phase out existing accounts.
+
+For more information about moving off the service, please [contact us](mailto:hello@astra.io) directly.
+
 Astra API Docs (v0.2)
 =====================
 
@@ -12,15 +19,13 @@ The infrastructure behind Astra has powered [PhotoShelter](http://www.photoshelt
 
 #### Contact
 
-* For more info, including rates, check out: https://astra.io/
-* To sign up for a **60-day free trial**, visit: https://astra.io/trial/
-* For support, feature requests, or bugs, e-mail: [hello@astra.io](mailto:hello@astra.io)
+Astra has been sunsetted, and we're no longer accepting trial accounts or feature requests.
+
+For questions about moving off Astra, please contact us directly: [hello@astra.io](mailto:hello@astra.io)
 
 #### Future Work
 
-While tested and stable, this version of Astra is a **preview release** which we'll be actively expanding.
-
-We have plans for implementing usage endpoints, cache rulesets, auth tokens, query ranges/paging, and more. If there's an object type, transform, or other feature you need, please [contact us](mailto:hello@astra.io).
+This version of Astra is a **preview release** which we are sunsetting. Prior to ending development, we had also planned usage endpoints, cache rulesets, auth tokens, query ranges/paging, and more.
 
 #### Contents
 
@@ -1250,6 +1255,7 @@ Changelog
 
 #### v0.2
 
+* 2015-07-25 - Add note about sunsetting service
 * 2014-11-14 - Clarify image resizing options
 * 2014-11-10 - Note that update can be used to move objects
 * 2014-11-03 - Add back vanilla object stream example
